@@ -505,8 +505,7 @@ server <- function(input, output){
 
             ProjectionModels[(i - 1) * 4 + j, 1] <- Scenario[j, 1]
             Critical_T <- qt(1 - ((1 - CI) / 2), SummarizedModels[i, 9])
-            StandardError_CI <- sqrt((1 / SummarizedModels[i, 9]) + ((((log(Scenario[j, 1] / ProjectionPeriods)
-                                                                       - log(SummarizedModels[i, 7])) ** 2) / SummarizedModels[i, 6])))
+            StandardError_CI <- sqrt((1 / SummarizedModels[i, 9]) + ((log(Scenario[j, 1] / ProjectionPeriods) - SummarizedModels[i, 7]) ** 2 / SummarizedModels[i, 6]))
 
             ExpectedConvs <- (SummarizedModels[i, 3] + log((Scenario[j, 1] / ProjectionPeriods)) * SummarizedModels[i, 4])
             LowerConvs    <- (ExpectedConvs - Critical_T * StandardError_CI)
@@ -555,7 +554,7 @@ server <- function(input, output){
 
               ProjectionModels[(i - 1) * 4 + j, 1] <- Scenario[j, 1] + ScheduledBudget
               Critical_T <- qt(1 - ((1 - CI) / 2), SummarizedModels[i, 9])
-              StandardError_CI <- sqrt((1 / SummarizedModels[i, 9]) + (((log((Scenario[j, 1] + RemainingBudget)/ ProjectionPeriods) - log(SummarizedModels[i, 7])) ** 2) / SummarizedModels[i, 6]))
+              StandardError_CI <- sqrt((1 / SummarizedModels[i, 9]) + (((log(Scenario[j, 1] + RemainingBudget)/ ProjectionPeriods) - SummarizedModels[i, 7]) ** 2 / SummarizedModels[i, 6]))
 
               ExpectedConvs <- (SummarizedModels[i, 3] + log(((Scenario[j, 1] + RemainingBudget) / ProjectionPeriods)) * SummarizedModels[i, 4])
               LowerConvs    <- (ExpectedConvs - Critical_T * StandardError_CI)
@@ -618,7 +617,7 @@ server <- function(input, output){
 
               ProjectionModelsP1[i, 1] <- RemainingBudget
               Critical_T <- qt(1 - ((1 - CI) / 2), SummarizedModels[i, 9])
-              StandardError_CI <- sqrt((1 / SummarizedModels[i, 9]) + (((log(RemainingBudget/ ProjectionPeriods1) - log(SummarizedModels[i, 7])) ** 2) / SummarizedModels[i, 6]))
+              StandardError_CI <- sqrt((1 / SummarizedModels[i, 9]) + ((log(RemainingBudget/ ProjectionPeriods1 - SummarizedModels[i, 7])) ** 2 / SummarizedModels[i, 6]))
 
               ExpectedConvsP1 <- (SummarizedModels[i, 3] + log((RemainingBudget / ProjectionPeriods1)) * SummarizedModels[i, 4])
               LowerConvsP1    <- (ExpectedConvsP1 - Critical_T * StandardError_CI)
@@ -644,7 +643,7 @@ server <- function(input, output){
 
                 ProjectionModels[(i - 1) * 4 + j, 1] <- Scenario[j, 1] + ScheduledBudget
                 Critical_T <- qt(1 - ((1 - CI) / 2), SummarizedModels[i, 9])
-                StandardError_CI <- sqrt((1 / SummarizedModels[i, 9]) + (((log(Scenario[j, 1] / ProjectionPeriods2) - log(SummarizedModels[i, 7])) ** 2) / SummarizedModels[i, 6]))
+                StandardError_CI <- sqrt((1 / SummarizedModels[i, 9]) + ((log(Scenario[j, 1] / ProjectionPeriods2) - SummarizedModels[i, 7]) ** 2 / SummarizedModels[i, 6]))
 
 
                 ExpectedConvsP2 <- (SummarizedModels[i, 3] + log((Scenario[j, 1] / ProjectionPeriods2))
@@ -705,7 +704,7 @@ server <- function(input, output){
 
               ProjectionModelsP1[i, 1] <- EstSpendTillInc
               Critical_T <- qt(1 - ((1 - CI) / 2), SummarizedModels[i, 9])
-              StandardError_CI <- sqrt((1 / SummarizedModels[i, 9]) + (((log(EstSpendTillInc / ProjectionPeriods1) - log(SummarizedModels[i, 7])) ** 2) / SummarizedModels[i, 6]))
+              StandardError_CI <- sqrt((1 / SummarizedModels[i, 9]) + ((log(EstSpendTillInc / ProjectionPeriods1) - SummarizedModels[i, 7]) ** 2 / SummarizedModels[i, 6]))
 
               ExpectedConvsP1 <- (SummarizedModels[i, 3] + log((EstSpendTillInc / ProjectionPeriods1))
                                   * SummarizedModels[i, 4])
@@ -732,7 +731,7 @@ server <- function(input, output){
 
                 ProjectionModels[(i - 1) * 4 + j, 1] <- Scenario[j, 1] + ScheduledBudget
                 Critical_T <- qt(1 - ((1 - CI) / 2), SummarizedModels[i, 9])
-                StandardError_CI <- sqrt((1 / SummarizedModels[i, 9]) + (((log((Scenario[j, 1] + LeftOverBudget)/ ProjectionPeriods2) - log(SummarizedModels[i, 7])) ** 2) / SummarizedModels[i, 6]))
+                StandardError_CI <- sqrt((1 / SummarizedModels[i, 9]) + ((log((Scenario[j, 1] + LeftOverBudget)/ ProjectionPeriods2) - SummarizedModels[i, 7]) ** 2 / SummarizedModels[i, 6]))
 
                 ExpectedConvsP2 <- (SummarizedModels[i, 3] + log(((Scenario[j, 1] + LeftOverBudget) / ProjectionPeriods2)) * SummarizedModels[i, 4])
                 LowerConvsP2    <- (ExpectedConvsP2 - Critical_T * StandardError_CI)
@@ -834,7 +833,7 @@ server <- function(input, output){
             ProjectionPeriods    <- as.numeric(((as.Date(CurrentPerfTable[CurrentPerfTable$Campaign == Campaigns, 3]) - Sys.Date()) + 1) /PeriodLength)
             ProjectionModels[(i - 1) * 4 + j, 1] <- Scenario[j, 1]
             Critical_T <- qt(1 - ((1 - CI) / 2), SummarizedModels[i, 9])
-            StandardError_CI <- sqrt((1 / SummarizedModels[i, 9]) + (((log(Scenario[j, 1] / ProjectionPeriods) - log(SummarizedModels[i, 7])) ** 2) / SummarizedModels[i, 6]))
+            StandardError_CI <- sqrt((1 / SummarizedModels[i, 9]) + ((log(Scenario[j, 1] / ProjectionPeriods) - SummarizedModels[i, 7]) ** 2 / SummarizedModels[i, 6]))
 
 
             ExpectedRev <- (SummarizedModels[i, 3] + log((Scenario[j, 1] / ProjectionPeriods)) * SummarizedModels[i, 4])
@@ -883,7 +882,7 @@ server <- function(input, output){
 
               ProjectionModels[(i - 1) * 4 + j, 1] <- Scenario[j, 1] + ScheduledBudget
               Critical_T <- qt(1 - ((1 - CI) / 2), SummarizedModels[i, 9])
-              StandardError_CI <- sqrt((1 / SummarizedModels[i, 9]) + (((log((Scenario[j, 1] + RemainingBudget) / ProjectionPeriods) - log(SummarizedModels[i, 7])) ** 2) / SummarizedModels[i, 6]))
+              StandardError_CI <- sqrt((1 / SummarizedModels[i, 9]) + ((log((Scenario[j, 1] + RemainingBudget) / ProjectionPeriods) - SummarizedModels[i, 7] ** 2) / SummarizedModels[i, 6]))
 
               ExpectedRev <- (SummarizedModels[i, 3] + log(((Scenario[j, 1] + RemainingBudget) / ProjectionPeriods)) * SummarizedModels[i, 4])
               LowerRev    <- (ExpectedRev - Critical_T * StandardError_CI)
@@ -946,8 +945,7 @@ server <- function(input, output){
 
               ProjectionModelsP1[i, 1] <- RemainingBudget
               Critical_T <- qt(1 - ((1 - CI) / 2), SummarizedModels[i, 9])
-              StandardError_CI <- sqrt((1 / SummarizedModels[i, 9] + ((((log(RemainingBudget
-                                                                             / ProjectionPeriods1) - SummarizedModels[i, 7])) ** 2) / SummarizedModels[i, 6])))
+              StandardError_CI <- sqrt((1 / SummarizedModels[i, 9]) + ((log(RemainingBudget / ProjectionPeriods1) - SummarizedModels[i, 7]) ** 2 / SummarizedModels[i, 6]))
 
               ExpectedRevP1 <- (SummarizedModels[i, 3] + log((RemainingBudget / ProjectionPeriods1)) * SummarizedModels[i, 4])
               LowerRevP1    <- (ExpectedRevP1 - Critical_T * StandardError_CI)
@@ -973,8 +971,7 @@ server <- function(input, output){
 
                 ProjectionModels[(i - 1) * 4 + j, 1] <- Scenario[j, 1] + ScheduledBudget
                 Critical_T <- qt(1 - ((1 - CI) / 2), SummarizedModels[i, 9])
-                StandardError_CI <- sqrt((1 / SummarizedModels[i, 9] + ((((log(Scenario[j, 1]
-                                                                               / ProjectionPeriods2) - SummarizedModels[i, 7])) ** 2) / SummarizedModels[i, 6])))
+                StandardError_CI <- sqrt((1 / SummarizedModels[i, 9]) + ((log(Scenario[j, 1] / ProjectionPeriods2) - SummarizedModels[i, 7]) ** 2 / SummarizedModels[i, 6]))
 
                 ExpectedRevP2 <- (SummarizedModels[i, 3] + log((Scenario[j, 1] / ProjectionPeriods2)) * SummarizedModels[i, 4])
                 LowerRevP2    <- (ExpectedRevP2 - Critical_T * StandardError_CI)
@@ -1031,8 +1028,7 @@ server <- function(input, output){
             for (i in 1:5){
               ProjectionModelsP1[i, 1] <- EstSpendTillInc
               Critical_T <- qt(1 - ((1 - CI) / 2), SummarizedModels[i, 9])
-              StandardError_CI <- sqrt((1 / SummarizedModels[i, 9] + ((((log(EstSpendTillInc / ProjectionPeriods1)
-                                                                         - SummarizedModels[i, 7])) ** 2) / SummarizedModels[i, 6])))
+              StandardError_CI <- sqrt((1 / SummarizedModels[i, 9]) + ((log(EstSpendTillInc / ProjectionPeriods1) - SummarizedModels[i, 7]) ** 2 / SummarizedModels[i, 6]))
 
               ExpectedRevP1 <- (SummarizedModels[i, 3] + log((EstSpendTillInc / ProjectionPeriods1)) * SummarizedModels[i, 4])
               LowerRevP1    <- (ExpectedRevP1 - Critical_T * StandardError_CI)
@@ -1059,8 +1055,7 @@ server <- function(input, output){
 
                 ProjectionModels[(i - 1) * 4 + j, 1] <- Scenario[j, 1] + ScheduledBudget
                 Critical_T <- qt(1 - ((1 - CI) / 2), SummarizedModels[i, 9])
-                StandardError_CI <- sqrt((1 / SummarizedModels[i, 9] + ((((log((Scenario[j, 1] + LeftOverBudget)
-                                                                               / ProjectionPeriods2) - SummarizedModels[i, 7])) ** 2) / SummarizedModels[i, 6])))
+                StandardError_CI <- sqrt((1 / SummarizedModels[i, 9]) + ((log((Scenario[j, 1] + LeftOverBudget) / ProjectionPeriods2) - SummarizedModels[i, 7]) ** 2 / SummarizedModels[i, 6]))
 
                 ExpectedRevP2 <- (SummarizedModels[i, 3] + log(((Scenario[j, 1] + LeftOverBudget) / ProjectionPeriods2)) * SummarizedModels[i, 4])
                 LowerRevP2    <- (ExpectedRevP2 - Critical_T * StandardError_CI)
