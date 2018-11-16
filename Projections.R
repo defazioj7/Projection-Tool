@@ -510,7 +510,7 @@ server <- function(input, output){
 
 
             ExpectedConvs <- (SummarizedModels[i, 3] + log((Scenario[j, 1] / ProjectionPeriods)) * SummarizedModels[i, 4])
-            LowerConvs    <- (ExpectedConvs - (Critical_T * SummarizedModels[i, 5] * StandardError_CI))
+            LowerConvs    <- max((ExpectedConvs - (Critical_T * SummarizedModels[i, 5] * StandardError_CI)), 0)
             UpperConvs    <- (ExpectedConvs + (Critical_T * SummarizedModels[i, 5] * StandardError_CI))
 
             ExpectedConvs <- SummarizedModels[i, 8] * ExpectedConvs
@@ -523,7 +523,7 @@ server <- function(input, output){
 
             ExpectedCPA   <- Scenario[j, 1] / ExpectedConvs
             LowerCPA      <- Scenario[j, 1] / UpperConvs
-            UpperCPA      <- Scenario[j, 1] / LowerConvs
+            UpperCPA      <- max((Scenario[j, 1] / LowerConvs), 0)
 
             ProjectionModels[(i - 1) * 4 + j, 2] <- LowerConvs
             ProjectionModels[(i - 1) * 4 + j, 3] <- ExpectedConvs
@@ -560,7 +560,7 @@ server <- function(input, output){
 
 
               ExpectedConvs <- (SummarizedModels[i, 3] + log(((Scenario[j, 1] + RemainingBudget) / ProjectionPeriods)) * SummarizedModels[i, 4])
-              LowerConvs    <- (ExpectedConvs - (Critical_T * SummarizedModels[i, 5] * StandardError_CI))
+              LowerConvs    <- max((ExpectedConvs - (Critical_T * SummarizedModels[i, 5] * StandardError_CI)), 0)
               UpperConvs    <- (ExpectedConvs + (Critical_T * SummarizedModels[i, 5] * StandardError_CI))
 
               ExpectedConvs <- SummarizedModels[i, 8] * ExpectedConvs
@@ -580,7 +580,7 @@ server <- function(input, output){
               TotalBudget   <- CurrentSpend + Scenario[j, 1] + RemainingBudget
 
               ExpectedCPA   <- TotalBudget / ExpectedConvs
-              LowerCPA      <- TotalBudget / UpperConvs
+              LowerCPA      <- max((TotalBudget / UpperConvs), 0)
               UpperCPA      <- TotalBudget / LowerConvs
 
               ProjectionModels[(i - 1) * 4 + j, 2] <- LowerConvs
@@ -1114,19 +1114,19 @@ server <- function(input, output){
 
   #output$table1 <- DT::renderDataTable({ datatable(ProjectionModels) })
 
-  output$table1 <- renderTable({ data()[[1]] })
-  output$table2 <- renderTable({ data()[[2]] })
-  output$table3 <- renderTable({ data()[[3]] })
-  output$table4 <- renderTable({ data()[[4]] })
-  output$table5 <- renderTable({ data()[[5]] })
+  output$table1    <- renderTable({ data()[[1]] })
+  output$table2    <- renderTable({ data()[[2]] })
+  output$table3    <- renderTable({ data()[[3]] })
+  output$table4    <- renderTable({ data()[[4]] })
+  output$table5    <- renderTable({ data()[[5]] })
 
-  output$table11 <- renderTable({ data()[[1]] })
-  output$table21 <- renderTable({ data()[[2]] })
-  output$table31 <- renderTable({ data()[[3]] })
-  output$table41 <- renderTable({ data()[[4]] })
-  output$table51 <- renderTable({ data()[[5]] })
+  output$table11   <- renderTable({ data()[[1]] })
+  output$table21   <- renderTable({ data()[[2]] })
+  output$table31   <- renderTable({ data()[[3]] })
+  output$table41   <- renderTable({ data()[[4]] })
+  output$table51   <- renderTable({ data()[[5]] })
 
-  output$Summary <- renderTable({ data()[[6]]})
+  output$Summary   <- renderTable({ data()[[6]]})
 
   output$DataTable <- renderTable({ data()[[7]] })
 
