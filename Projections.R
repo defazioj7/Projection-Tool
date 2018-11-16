@@ -237,7 +237,7 @@ server <- function(input, output){
         FCInfo <- fn$paste("SELECT distinct f.name AS FlightName
                            , f.start_date
                            , f.end_date
-                           , f.budget
+                           , f.budget*c.exchange_rate
                            , sum(fd.budget_delivered*c.exchange_rate) AS Revenue
                            , sum(fd.reporting_verified_credited_view_conversions + fd.reporting_verified_credited_click_conversions) AS Conversions
                            , sum(fd.reporting_verified_credited_client_revenue) AS ClientRevenue
@@ -349,7 +349,7 @@ server <- function(input, output){
                            , fd.budget_delivered*c.exchange_rate
                            , f.start_date
                            , f.end_date
-                           , f.budget
+                           , f.budget*c.exchange_rate
                            FROM  flights f JOIN campaigns c ON c.id = f.campaign_id
                            JOIN flights_daily_metrics fd ON f.id = fd.flight_id
                            WHERE (f.name in $FlightsQ or f.name in $PriorFlights)
@@ -434,8 +434,9 @@ server <- function(input, output){
       # }
     }
 
-    ModelRange        <- 1:(as.matrix(dim(ModelData))[1, 1] - 4)
-    SummarizedModels  <- data.frame(matrix(ncol = 9, nrow = 0))
+    ModelRange          <- 1:(as.matrix(dim(ModelData))[1, 1] - 4)
+    SummarizedModels    <- data.frame(matrix(ncol = 9, nrow = 0))
+    colnames(ModelData) <- c("Impressions", "Clicks", "Conversions", "Client Revenue", "Budget Delivered")
 
     CI <- 0.7
     ProjectionModels  <- data.frame(matrix(ncol = 7, nrow = 0))
@@ -510,7 +511,7 @@ server <- function(input, output){
 
 
             ExpectedConvs <- (SummarizedModels[i, 3] + log((Scenario[j, 1] / ProjectionPeriods)) * SummarizedModels[i, 4])
-            LowerConvs    <- max((ExpectedConvs - (Critical_T * SummarizedModels[i, 5] * StandardError_CI)), 0)
+            LowerConvs    <- (ExpectedConvs - (Critical_T * SummarizedModels[i, 5] * StandardError_CI))
             UpperConvs    <- (ExpectedConvs + (Critical_T * SummarizedModels[i, 5] * StandardError_CI))
 
             ExpectedConvs <- SummarizedModels[i, 8] * ExpectedConvs
@@ -523,7 +524,7 @@ server <- function(input, output){
 
             ExpectedCPA   <- Scenario[j, 1] / ExpectedConvs
             LowerCPA      <- Scenario[j, 1] / UpperConvs
-            UpperCPA      <- max((Scenario[j, 1] / LowerConvs), 0)
+            UpperCPA      <- Scenario[j, 1] / LowerConvs
 
             ProjectionModels[(i - 1) * 4 + j, 2] <- LowerConvs
             ProjectionModels[(i - 1) * 4 + j, 3] <- ExpectedConvs
@@ -560,7 +561,7 @@ server <- function(input, output){
 
 
               ExpectedConvs <- (SummarizedModels[i, 3] + log(((Scenario[j, 1] + RemainingBudget) / ProjectionPeriods)) * SummarizedModels[i, 4])
-              LowerConvs    <- max((ExpectedConvs - (Critical_T * SummarizedModels[i, 5] * StandardError_CI)), 0)
+              LowerConvs    <- (ExpectedConvs - (Critical_T * SummarizedModels[i, 5] * StandardError_CI))
               UpperConvs    <- (ExpectedConvs + (Critical_T * SummarizedModels[i, 5] * StandardError_CI))
 
               ExpectedConvs <- SummarizedModels[i, 8] * ExpectedConvs
@@ -580,7 +581,7 @@ server <- function(input, output){
               TotalBudget   <- CurrentSpend + Scenario[j, 1] + RemainingBudget
 
               ExpectedCPA   <- TotalBudget / ExpectedConvs
-              LowerCPA      <- max((TotalBudget / UpperConvs), 0)
+              LowerCPA      <- TotalBudget / UpperConvs
               UpperCPA      <- TotalBudget / LowerConvs
 
               ProjectionModels[(i - 1) * 4 + j, 2] <- LowerConvs
