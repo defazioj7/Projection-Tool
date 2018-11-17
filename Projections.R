@@ -154,23 +154,23 @@ server <- function(input, output){
   #-------------------------------------------------calculate and display current campaign performance---------------------------------------------
   performance <- eventReactive(input$submit,{
 
-    IncrementalPeriod  <- input$IncrementalPeriod
-    CurrentNew         <- input$CurrentNew
-    Campaigns          <- input$Campaigns
-    PriorCampaigns     <- input$PriorCampaigns
-    Flights            <- input$Flights
-    PriorFlights       <- input$PriorFlights
-    #StartDate         <- input$StartDate
-    #EndDate           <- input$EndDate
-    GoalType           <- input$GoalType
-    Basis              <- input$FlightCampaign
+    # IncrementalPeriod  <- input$IncrementalPeriod
+    # CurrentNew         <- input$CurrentNew
+    # Campaigns          <- input$Campaigns
+    # PriorCampaigns     <- input$PriorCampaigns
+    # Flights            <- input$Flights
+    # PriorFlights       <- input$PriorFlights
+    # StartDate          <- input$StartDate
+    # EndDate            <- input$EndDate
+    GoalType             <- input$GoalType
+    Basis                <- input$FlightCampaign
 
     if (Basis == "Campaigns"){
 
       Campaigns      <- input$Campaigns
       PriorCampaigns <- input$PriorCampaigns
 
-    }else if(Basis = "Flights"){
+    }else if(Basis == "Flights"){
 
       Campaigns        <- input$Flights
       PriorCampaigns   <- input$PriorFlights
@@ -178,12 +178,12 @@ server <- function(input, output){
     }
 
 
-    CampaignsQ <- paste(Campaigns, collapse = '\',\'')
-    CampaignsQ <- gsub(" ", "", Campaigns)
-    CampaignsQ <- fn$paste("('$Campaigns')")
+    CampaignsQ <- gsub(" ", "','", Campaigns)
+    CampaignsQ <- gsub("\n", "", CampaignsQ)
+    CampaignsQ <- fn$paste("('$CampaignsQ')")
 
-    PriorCampaigns <- paste(PriorCampaigns, collapse = '\',\'')
-    PriorCampaigns <- gsub(" ", "", PriorCampaigns)
+    PriorCampaigns <- gsub(" ", "','", PriorCampaigns)
+    PriorCampaigns <- gsub("\n", "", PriorCampaigns)
     PriorCampaigns <- fn$paste("('$PriorCampaigns')")
 
     # Flights <- paste(Flights, collapse = '\',\'')
@@ -243,10 +243,6 @@ server <- function(input, output){
 
       }}else if(Basis == "Flights") {
 
-
-        DWQuery <- sqlInterpolate(con, AugQuery)
-        GetData <- dbGetQuery(con, DWQuery)
-
         FCInfo <- fn$paste("SELECT distinct f.name AS FlightName
                            , f.start_date
                            , f.end_date
@@ -258,7 +254,7 @@ server <- function(input, output){
                            , COALESCE(sum(fd.reporting_verified_credited_client_revenue) / NULLIF(sum(fd.budget_delivered*c.exchange_rate), 0), 0) as ROAS
                            FROM  flights f JOIN campaigns c ON c.id = f.campaign_id
                            JOIN flights_daily_metrics fd ON f.id = fd.flight_id
-                           WHERE (f.name in $Flights or f.name in $PriorFlights)
+                           WHERE (f.name in $CampaignsQ or f.name in $PriorCampaigns)
                            GROUP BY 1, 2, 3, 4
                            ORDER BY 1;")
 
@@ -303,20 +299,31 @@ server <- function(input, output){
 
     IncrementalPeriod  <- input$IncrementalPeriod
     CurrentNew         <- input$CurrentNew
-    Campaigns          <- input$Campaigns
-    PriorCampaigns     <- input$PriorCampaigns
+    # Campaigns          <- input$Campaigns
+    # PriorCampaigns     <- input$PriorCampaigns
     # Flights            <- input$Flights
     # PriorFlights       <- input$PriorFlights
     GoalType           <- input$GoalType
     Basis              <- input$FlightCampaign
 
+    if (Basis == "Campaigns"){
 
-    CampaignsQ <- paste(Campaigns, collapse = '\',\'')
-    CampaignsQ <- gsub(" ", "", Campaigns)
-    CampaignsQ <- fn$paste("('$Campaigns')")
+      Campaigns      <- input$Campaigns
+      PriorCampaigns <- input$PriorCampaigns
 
-    PriorCampaigns <- paste(PriorCampaigns, collapse = '\',\'')
-    PriorCampaigns <- gsub(" ", "", PriorCampaigns)
+    }else if(Basis == "Flights"){
+
+      Campaigns        <- input$Flights
+      PriorCampaigns   <- input$PriorFlights
+
+    }
+
+    CampaignsQ <- gsub(" ", "','", Campaigns)
+    CampaignsQ <- gsub("\n", "", CampaignsQ)
+    CampaignsQ <- fn$paste("('$CampaignsQ')")
+
+    PriorCampaigns <- gsub(" ", "','", PriorCampaigns)
+    PriorCampaigns <- gsub("\n", "", PriorCampaigns)
     PriorCampaigns <- fn$paste("('$PriorCampaigns')")
 
     # FlightsQ <- paste(Flights, collapse = '\',\'')
@@ -365,7 +372,7 @@ server <- function(input, output){
                            , f.budget*c.exchange_rate
                            FROM  flights f JOIN campaigns c ON c.id = f.campaign_id
                            JOIN flights_daily_metrics fd ON f.id = fd.flight_id
-                           WHERE (f.name in $FlightsQ or f.name in $PriorFlights)
+                           WHERE (f.name in $CampaignsQ or f.name in $PriorCampaigns)
                            ORDER BY 3;")
     }
 
