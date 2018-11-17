@@ -165,6 +165,19 @@ server <- function(input, output){
     GoalType           <- input$GoalType
     Basis              <- input$FlightCampaign
 
+    if (Basis == "Campaigns"){
+
+      Campaigns      <- input$Campaigns
+      PriorCampaigns <- input$PriorCampaigns
+
+    }else if(Basis = "Flights"){
+
+      Campaigns        <- input$Flights
+      PriorCampaigns   <- input$PriorFlights
+
+    }
+
+
     CampaignsQ <- paste(Campaigns, collapse = '\',\'')
     CampaignsQ <- gsub(" ", "", Campaigns)
     CampaignsQ <- fn$paste("('$Campaigns')")
