@@ -22,7 +22,7 @@ ui <- fluidPage(
               tabPanel("Projections Part II",
 
                        sidebarPanel(width = 9,
-                                    h3("Build Model",style="color:blue;font-size:26px"),
+                                    h3("Select Model Data & Review Performance",style="color:blue;font-size:26px"),
 
                                     selectInput(inputId = "FlightCampaign", label = "Select Basis",
                                                 choices= c("Campaigns", "Flights"), selected = "Campaigns"),
@@ -151,7 +151,7 @@ server <- function(input, output){
 
   #------------------------------------------------------------------------------------------------------------------------------------------------
 
-  #-------------------------------------------------calculate and display current campaign performance---------------------------------------------
+  #------------------------------------------calculate and display current / priro campaign performance---------------------------------------------
   performance <- eventReactive(input$submit,{
 
     # IncrementalPeriod  <- input$IncrementalPeriod
@@ -297,6 +297,7 @@ server <- function(input, output){
 
   data <- eventReactive(input$ScenarioSubmit,{
 
+
     IncrementalPeriod  <- input$IncrementalPeriod
     CurrentNew         <- input$CurrentNew
     # Campaigns          <- input$Campaigns
@@ -359,7 +360,7 @@ server <- function(input, output){
 
     }else if(Basis == "Flights") {
 
-      AugQuery <- fn$paste("SELECT c.name AS
+      AugQuery <- fn$paste("SELECT c.name AS CampaignName
                            , f.name AS FlightName
                            , fd.date AS ReportDate
                            , fd.reporting_verified_external_impressions
@@ -381,19 +382,23 @@ server <- function(input, output){
 
     GetDataTable <- data.frame(matrix(ncol = 11, nrow = as.matrix(dim(GetData))[1, 1]))
 
-    GetDataTable[, 1] <- as.data.frame(GetData [, 1])
-    GetDataTable[, 2] <- as.data.frame(GetData [, 2])
-    GetDataTable[, 3] <- as.data.frame(GetData [, 3])
-    GetDataTable[, 4] <- as.data.frame(GetData [, 4])
-    GetDataTable[, 5] <- as.data.frame(GetData [, 5])
-    GetDataTable[, 6] <- as.data.frame(GetData [, 6])
-    GetDataTable[, 7] <- as.data.frame(GetData [, 7])
-    GetDataTable[, 8] <- as.data.frame(GetData [, 8])
-    GetDataTable[, 9] <- as.data.frame(GetData [, 9])
-    GetDataTable[, 10] <- as.data.frame(GetData [, 10])
-    GetDataTable[, 11] <- as.data.frame(GetData [, 11])
+    GetDataTable <- as.data.frame(GetData)
+
+    # GetDataTable[, 1] <- as.data.frame(GetData [, 1])
+    # GetDataTable[, 2] <- as.data.frame(GetData [, 2])
+    # GetDataTable[, 3] <- as.data.frame(GetData [, 3])
+    # GetDataTable[, 4] <- as.data.frame(GetData [, 4])
+    # GetDataTable[, 5] <- as.data.frame(GetData [, 5])
+    # GetDataTable[, 6] <- as.data.frame(GetData [, 6])
+    # GetDataTable[, 7] <- as.data.frame(GetData [, 7])
+    # GetDataTable[, 8] <- as.data.frame(GetData [, 8])
+    # GetDataTable[, 9] <- as.data.frame(GetData [, 9])
+    # GetDataTable[, 10] <- as.data.frame(GetData [, 10])
+    # GetDataTable[, 11] <- as.data.frame(GetData [, 11])
 
     DataLength <- as.matrix(dim(GetDataTable))[1, 1]
+
+    if(Basis == 'Campaigns'){
 
     FCInfo <- fn$paste("SELECT distinct c.name AS CampaignName
                        , c.start_date
@@ -406,10 +411,28 @@ server <- function(input, output){
                        , COALESCE(sum(fd.reporting_verified_credited_client_revenue) / NULLIF(sum(fd.budget_delivered*c.exchange_rate), 0), 0) as ROAS
                        FROM  flights f JOIN campaigns c ON c.id = f.campaign_id
                        JOIN flights_daily_metrics fd ON f.id = fd.flight_id
-                       WHERE (c.name in $CampaignsQ or c.name in $PriorCampaigns)
+                       WHERE c.name in $CampaignsQ
                        GROUP BY 1, 2, 3, 4
                        ORDER BY 1;")
 
+    }else if(Basis == 'Flights'){
+
+     FCInfo <- fn$paste("SELECT distinct f.name AS FlightName
+                       , f.start_date
+                       , f.end_date
+                       , f.budget
+                       , sum(fd.budget_delivered*c.exchange_rate) AS Revenue
+                       , sum(fd.reporting_verified_credited_view_conversions + fd.reporting_verified_credited_click_conversions) AS Conversions
+                       , sum(fd.reporting_verified_credited_client_revenue) AS ClientRevenue
+                       , COALESCE(sum(fd.budget_delivered*c.exchange_rate) / NULLIF((sum(fd.reporting_verified_credited_view_conversions + fd.reporting_verified_credited_click_conversions)), 0), 0) AS CPA
+                       , COALESCE(sum(fd.reporting_verified_credited_client_revenue) / NULLIF(sum(fd.budget_delivered*c.exchange_rate), 0), 0) as ROAS
+                       FROM  flights f JOIN campaigns c ON c.id = f.campaign_id
+                       JOIN flights_daily_metrics fd ON f.id = fd.flight_id
+                       WHERE f.name in $CampaignsQ
+                       GROUP BY 1, 2, 3, 4
+                       ORDER BY 1;")
+
+    }
     DWQuery <- sqlInterpolate(con, FCInfo)
     FCInfo  <- dbGetQuery(con, DWQuery)
 
@@ -554,20 +577,24 @@ server <- function(input, output){
             ProjectionModels[(i - 1) * 4 + j, 7] <- UpperCPA
 
           }
+
         }
       }else if (CurrentNew == "Current (Incremental)"){
 
 
         if(IncrementalPeriod == "Start today / end on schedule"){
 
-          CurrentSpend   <- as.numeric(CurrentPerfTable[CurrentPerfTable$Campaign == Campaigns, 5])
-          CurrentConvs   <- as.numeric(CurrentPerfTable[CurrentPerfTable$Campaign == Campaigns, 6])
+          # CurrentSpend   <- as.numeric(CurrentPerfTable[CurrentPerfTable$Campaign == Campaigns, 5])
+          # CurrentConvs   <- as.numeric(CurrentPerfTable[CurrentPerfTable$Campaign == Campaigns, 6])
 
-          ScheduledBudget      <- as.numeric(CurrentPerfTable[CurrentPerfTable$Campaign == Campaigns, 4])
+          CurrentSpend   <- sum(CurrentPerfTable[, 5])
+          CurrentConvs   <- sum(CurrentPerfTable[, 6])
+
+          ScheduledBudget      <- sum(CurrentPerfTable[, 4])
           RemainingBudget      <- ScheduledBudget - CurrentSpend
 
           #ProjectionPeriods    <- 4
-          ProjectionPeriods    <- as.numeric(((as.Date(CurrentPerfTable[CurrentPerfTable$Campaign == Campaigns, 3]) - Sys.Date()) + 1) /PeriodLength)
+          ProjectionPeriods    <- as.numeric(((as.Date(CurrentPerfTable[1, 3]) - Sys.Date()) + 1) /PeriodLength)
 
           #Conversion amount to date
 
@@ -617,15 +644,15 @@ server <- function(input, output){
           NewStartDate  <- as.Date(input$NewStartDateCustom)
           NewEndDate    <- as.Date(input$NewEndDateCustom)
 
-          ScheduledEndDate     <- as.Date(CurrentPerfTable[CurrentPerfTable$Campaign == Campaigns, 3])
+          ScheduledEndDate     <- as.Date(CurrentPerfTable[1, 3])
           ProjectionModelsP1   <- data.frame(matrix(ncol = 7, nrow = 0))
 
           if(ScheduledEndDate <= NewStartDate){
 
-            ScheduledStartDate   <- as.Date(CurrentPerfTable[CurrentPerfTable$Campaign == Campaigns, 2])
-            ScheduledBudget      <- CurrentPerfTable[CurrentPerfTable$Campaign == Campaigns, 4]
-            CurrentSpend         <- CurrentPerfTable[CurrentPerfTable$Campaign == Campaigns, 5]
-            CurrentConvs         <- CurrentPerfTable[CurrentPerfTable$Campaign == Campaigns, 6]
+            ScheduledStartDate   <- as.Date(CurrentPerfTable[1, 2])
+            ScheduledBudget      <- sum(CurrentPerfTable[, 4])
+            CurrentSpend         <- sum(CurrentPerfTable[, 5])
+            CurrentConvs         <- sum(CurrentPerfTable[, 6])
 
             RemainingBudget      <- ScheduledBudget - CurrentSpend
             DaysUntilIncremental <- min(as.numeric(as.Date(ScheduledEndDate) - Sys.Date()) + 1, as.numeric(as.Date(NewStartDate) - Sys.Date()) + 1)
@@ -706,10 +733,10 @@ server <- function(input, output){
             }
           }else if (ScheduledEndDate > NewStartDate){
 
-            ScheduledStartDate   <- as.Date(CurrentPerfTable[CurrentPerfTable$Campaign == Campaigns, 2])
-            ScheduledBudget      <- CurrentPerfTable[CurrentPerfTable$Campaign == Campaigns, 4]
-            CurrentSpend         <- CurrentPerfTable[CurrentPerfTable$Campaign == Campaigns, 5]
-            CurrentConvs         <- CurrentPerfTable[CurrentPerfTable$Campaign == Campaigns, 6]
+            ScheduledStartDate   <- as.Date(CurrentPerfTable[1, 2])
+            ScheduledBudget      <- sum(CurrentPerfTable[, 4])
+            CurrentSpend         <- sum(CurrentPerfTable[, 5])
+            CurrentConvs         <- sum(CurrentPerfTable[, 6])
 
             RemainingBudget      <- ScheduledBudget - CurrentSpend
 
@@ -856,7 +883,7 @@ server <- function(input, output){
           for (j in 1:4){
 
 
-            ProjectionPeriods    <- as.numeric(((as.Date(CurrentPerfTable[CurrentPerfTable$Campaign == Campaigns, 3]) - Sys.Date()) + 1) /PeriodLength)
+            # ProjectionPeriods    <- as.numeric(((as.Date(CurrentPerfTable[CurrentPerfTable$Campaign == Campaigns, 3]) - Sys.Date()) + 1) /PeriodLength)
             ProjectionModels[(i - 1) * 4 + j, 1] <- Scenario[j, 1]
             Critical_T <- qt(1 - ((1 - CI) / 2), SummarizedModels[i, 9])
             StandardError_CI <- sqrt((1 / SummarizedModels[i, 9]) + (((log(Scenario[j, 1] / ProjectionPeriods) - SummarizedModels[i, 7]) ** 2) / SummarizedModels[i, 6]))
@@ -891,13 +918,14 @@ server <- function(input, output){
 
         if(IncrementalPeriod == "Start today / end on schedule"){
 
-          CurrentSpend <- as.numeric(CurrentPerfTable[CurrentPerfTable$Campaign == Campaigns, 5])
-          CurrentRev   <- as.numeric(CurrentPerfTable[CurrentPerfTable$Campaign == Campaigns, 6])
+            CurrentSpend         <- sum(CurrentPerfTable[, 5])
+            CurrentRev           <- sum(CurrentPerfTable[, 6])
 
-          ScheduledBudget      <- as.numeric(CurrentPerfTable[CurrentPerfTable$Campaign == Campaigns, 4])
+
+          ScheduledBudget      <- sum(CurrentPerfTable[, 4])
           RemainingBudget      <- ScheduledBudget - CurrentSpend
 
-          ProjectionPeriods    <- as.numeric(((as.Date(CurrentPerfTable[CurrentPerfTable$Campaign == Campaigns, 3]) - Sys.Date()) + 1) /PeriodLength)
+          ProjectionPeriods    <- as.numeric(((as.Date(CurrentPerfTable[1, 3]) - Sys.Date()) + 1) /PeriodLength)
           #ProjectionPeriods    <- 4
           #Conversion amount to date
 
@@ -946,15 +974,15 @@ server <- function(input, output){
           NewStartDate  <- as.Date(input$NewStartDateCustom)
           NewEndDate    <- as.Date(input$NewEndDateCustom)
 
-          ScheduledEndDate     <- as.Date(CurrentPerfTable[CurrentPerfTable$Campaign == Campaigns, 3])
+          ScheduledEndDate     <- as.Date(CurrentPerfTable[1, 3])
           ProjectionModelsP1  <- data.frame(matrix(ncol = 7, nrow = 0))
 
           if(ScheduledEndDate <= NewStartDate){
 
-            ScheduledStartDate   <- CurrentPerfTable[CurrentPerfTable$Campaign == Campaigns, 2]
-            ScheduledBudget      <- CurrentPerfTable[CurrentPerfTable$Campaign == Campaigns, 4]
-            CurrentSpend         <- CurrentPerfTable[CurrentPerfTable$Campaign == Campaigns, 5]
-            CurrentRev           <- CurrentPerfTable[CurrentPerfTable$Campaign == Campaigns, 6]
+            ScheduledStartDate   <- as.Date(CurrentPerfTable[1, 2])
+            ScheduledBudget      <- sum(CurrentPerfTable[, 4])
+            CurrentSpend         <- sum(CurrentPerfTable[, 5])
+            CurrentRev           <- sum(CurrentPerfTable[, 6])
 
             RemainingBudget      <- ScheduledBudget - CurrentSpend
             DaysUntilIncremental <- min(as.numeric(as.Date(ScheduledEndDate) - Sys.Date()) + 1, as.numeric(as.Date(NewStartDate) - Sys.Date()) + 1)
@@ -1032,10 +1060,10 @@ server <- function(input, output){
           }else if (ScheduledEndDate > NewStartDate){
 
 
-            ScheduledStartDate   <- as.Date(CurrentPerfTable[CurrentPerfTable$Campaign == Campaigns, 2])
-            ScheduledBudget      <- CurrentPerfTable[CurrentPerfTable$Campaign == Campaigns, 4]
-            CurrentSpend         <- CurrentPerfTable[CurrentPerfTable$Campaign == Campaigns, 5]
-            CurrentRev           <- CurrentPerfTable[CurrentPerfTable$Campaign == Campaigns, 6]
+            ScheduledStartDate   <- as.Date(CurrentPerfTable[1, 2])
+            ScheduledBudget      <- sum(CurrentPerfTable[, 4])
+            CurrentSpend         <- sum(CurrentPerfTable[, 5])
+            CurrentRev           <- sum(CurrentPerfTable[, 6])
 
             RemainingBudget      <- ScheduledBudget - CurrentSpend
 
