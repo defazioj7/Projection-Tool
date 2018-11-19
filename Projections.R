@@ -384,19 +384,7 @@ server <- function(input, output){
 
     GetDataTable <- as.data.frame(GetData)
 
-    # GetDataTable[, 1] <- as.data.frame(GetData [, 1])
-    # GetDataTable[, 2] <- as.data.frame(GetData [, 2])
-    # GetDataTable[, 3] <- as.data.frame(GetData [, 3])
-    # GetDataTable[, 4] <- as.data.frame(GetData [, 4])
-    # GetDataTable[, 5] <- as.data.frame(GetData [, 5])
-    # GetDataTable[, 6] <- as.data.frame(GetData [, 6])
-    # GetDataTable[, 7] <- as.data.frame(GetData [, 7])
-    # GetDataTable[, 8] <- as.data.frame(GetData [, 8])
-    # GetDataTable[, 9] <- as.data.frame(GetData [, 9])
-    # GetDataTable[, 10] <- as.data.frame(GetData [, 10])
-    # GetDataTable[, 11] <- as.data.frame(GetData [, 11])
-
-    DataLength <- as.matrix(dim(GetDataTable))[1, 1]
+    DataLength   <- length(unique(GetData[, 3]))
 
     if(Basis == 'Campaigns'){
 
@@ -450,15 +438,11 @@ server <- function(input, output){
       ModelData           <- read.zoo(GetDataTable[, 3:8], header = TRUE)
       ep                  <- endpoints(ModelData, on = 'weeks')
       ModelData           <- as.matrix(period.apply(ModelData, ep, colSums))
-      # FirstWeekAdjustment <- (7 / (DataLength %% 7))
+
       PeriodLength        <- 7
 
       ModelDataLength     <- as.matrix(dim(ModelData))[1, 1]
 
-      # if(FirstWeekAdjustment != Inf){
-      #   AdjustedWeek    <- FirstWeekAdjustment * ModelData[1, ]
-      #   ModelData[1, ]  <- AdjustedWeek
-      # }
 
     }else if (DataLength <28) {
 
@@ -472,6 +456,7 @@ server <- function(input, output){
       # if(FirstWeekAdjustment != Inf){
 
       #   AdjustedWeek      <- FirstWeekAdjustment * ModelData[1, ]
+
       #   ModelData[1, ]    <- AdjustedWeek
 
       # }
@@ -510,9 +495,9 @@ server <- function(input, output){
 
         if (length(UpdatedRange) > 0 ){
 
-          for (i in UpdatedRange){
+          for (j in UpdatedRange){
 
-            CurrentData[i, ] <- t(UpdatedRows)
+            CurrentData[j, ] <- t(UpdatedRows)
           }
         }
 
@@ -824,7 +809,7 @@ server <- function(input, output){
                                       "Conv. High", "CPA Low", "Expected CPA", "CPA High")
       #------------------------------------------------------------------ROAS---------------------------------------------------------------
     }else if(GoalType == "ROAS"){
-
+browser()
       CurrentPerfTable[, 6] <- as.data.frame(FCInfo [, 7])
       CurrentPerfTable[, 7] <- as.data.frame(FCInfo [, 9])
 
@@ -845,9 +830,9 @@ server <- function(input, output){
         UpdatedRange    <- as.array(which(CurrentData$revenue < 1))
 
         if (length(UpdatedRange) > 0 ){
-          for (i in UpdatedRange){
+          for (j in UpdatedRange){
 
-            CurrentData[i, ] <- t(UpdatedRows)
+            CurrentData[j, ] <- t(UpdatedRows)
           }
         }
         CurrentModel          <- lm(ClientRevenue ~ lnrevenue, data = CurrentData, na.action = na.exclude)
