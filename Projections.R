@@ -36,7 +36,7 @@ ui <- fluidPage(
 
 
                                       textInput(inputId = "Campaigns",
-                                                label = "Enter current / prior campaign name below:"),
+                                                label = "Enter current / most recent campaign name below:"),
                                       textInput(inputId = "PriorCampaigns",
                                                 label = "Optional: Enter prior campaign names below for additional data (separated by spaces):")
                                       # textInput(inputId = "StartDate",
@@ -54,7 +54,7 @@ ui <- fluidPage(
                                       #                         "Individual flight projections"),
                                       #             selected = "Combined flight projection"),
                                       textInput(inputId = "Flights",
-                                                label = "Enter current / prior flight name(s) below (separated by spaces):"),
+                                                label = "Enter current / most recent flight name(s) below (separated by spaces):"),
                                       textInput(inputId = "PriorFlights",
                                                 label = "Optional: Enter prior flight names below for additional data (separated by spaces):")
                                       # textInput(inputId = "StartDate",
@@ -200,7 +200,7 @@ server <- function(input, output){
       FCInfo <- fn$paste("SELECT distinct c.name AS CampaignName
                          , c.start_date
                          , c.end_date
-                         , c.budget
+                         , c.budget*c.exchange_rate
                          , sum(fd.budget_delivered*c.exchange_rate) AS Revenue
                          , sum(fd.reporting_verified_credited_view_conversions + fd.reporting_verified_credited_click_conversions) AS Conversions
                          , sum(fd.reporting_verified_credited_client_revenue) AS ClientRevenue
@@ -352,7 +352,7 @@ server <- function(input, output){
                            , fd.budget_delivered*c.exchange_rate AS Revenue
                            , c.start_date
                            , c.end_date
-                           , c.budget
+                           , c.budget*c.exchange_rate
                            FROM  flights f JOIN campaigns c ON c.id = f.campaign_id
                            JOIN flights_daily_metrics fd ON f.id = fd.flight_id
                            WHERE (c.name in $CampaignsQ or c.name in $PriorCampaigns)
@@ -391,7 +391,7 @@ server <- function(input, output){
     FCInfo <- fn$paste("SELECT distinct c.name AS CampaignName
                        , c.start_date
                        , c.end_date
-                       , c.budget
+                       , c.budget*c.exchange_rate
                        , sum(fd.budget_delivered*c.exchange_rate) AS Revenue
                        , sum(fd.reporting_verified_credited_view_conversions + fd.reporting_verified_credited_click_conversions) AS Conversions
                        , sum(fd.reporting_verified_credited_client_revenue) AS ClientRevenue
@@ -408,7 +408,7 @@ server <- function(input, output){
      FCInfo <- fn$paste("SELECT distinct f.name AS FlightName
                        , f.start_date
                        , f.end_date
-                       , f.budget
+                       , f.budget*c.exchange_rate
                        , sum(fd.budget_delivered*c.exchange_rate) AS Revenue
                        , sum(fd.reporting_verified_credited_view_conversions + fd.reporting_verified_credited_click_conversions) AS Conversions
                        , sum(fd.reporting_verified_credited_client_revenue) AS ClientRevenue
