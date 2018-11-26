@@ -151,7 +151,7 @@ server <- function(input, output){
 
   #------------------------------------------------------------------------------------------------------------------------------------------------
 
-  #------------------------------------------calculate and display current / priro campaign performance---------------------------------------------
+  #------------------------------------------calculate and display current / priro campaign performance--------------------------------------------
   performance <- eventReactive(input$submit,{
 
     # IncrementalPeriod  <- input$IncrementalPeriod
