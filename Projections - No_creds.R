@@ -9,11 +9,11 @@ library(scales)
 drv <- dbDriver("PostgreSQL")
 
 #create connection to the adreporting PostgreSQL database
-con <- dbConnect(drv, dbname = "production",
-                 host = "datawarehouse.corp.qc",
-                 port = 5439,
-                 user ="jdefazio",
-                 password = "Ahb4yoo4Ie")
+con <- dbConnect(drv, dbname = "xxxxxxxx",
+                 host = "xxxxxxxx",
+                 port = xxxxxxxxx,
+                 user ="xxxxxxxxx",
+                 password = "xxxxxxxxxx")
 options(shiny.error = browser)
 
 ui <- fluidPage(
