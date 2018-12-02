@@ -8,7 +8,7 @@ library(scales)
 
 drv <- dbDriver("PostgreSQL")
 
-#create connection to the adreporting PostgreSQL database
+##create connection to the adreporting PostgreSQL database
 con <- dbConnect(drv, dbname = "production",
                  host = "datawarehouse.corp.qc",
                  port = 5439,
@@ -809,7 +809,7 @@ server <- function(input, output){
                                       "Conv. High", "CPA Low", "Expected CPA", "CPA High")
       #------------------------------------------------------------------ROAS---------------------------------------------------------------
     }else if(GoalType == "ROAS"){
-browser()
+
       CurrentPerfTable[, 6] <- as.data.frame(FCInfo [, 7])
       CurrentPerfTable[, 7] <- as.data.frame(FCInfo [, 9])
 
