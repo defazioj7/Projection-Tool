@@ -527,7 +527,7 @@ server <- function(input, output){
         NewStartDate  <- as.Date(input$NewStartDate)
         NewEndDate    <- as.Date(input$NewEndDate)
 
-        ProjectionPeriods <- as.numeric(as.Date(NewEndDate) - as.Date(NewStartDate)) / PeriodLength
+        ProjectionPeriods <- as.numeric(as.Date(NewEndDate) - as.Date(NewStartDate) + 1) / PeriodLength
 
         for (i in 1:5){
 
@@ -579,7 +579,7 @@ server <- function(input, output){
           RemainingBudget      <- ScheduledBudget - CurrentSpend
 
           #ProjectionPeriods    <- 4
-          ProjectionPeriods    <- as.numeric(((as.Date(CurrentPerfTable[1, 3]) - Sys.Date()) + 1) /PeriodLength)
+          ProjectionPeriods    <- as.numeric(((as.Date(CurrentPerfTable[1, 3]) - Sys.Date()) + 1) / PeriodLength)
 
           #Conversion amount to date
 
@@ -643,7 +643,7 @@ server <- function(input, output){
             DaysUntilIncremental <- min(as.numeric(as.Date(ScheduledEndDate) - Sys.Date()) + 1, as.numeric(as.Date(NewStartDate) - Sys.Date()) + 1)
 
             ProjectionPeriods1 <- DaysUntilIncremental / PeriodLength
-            ProjectionPeriods2 <- as.numeric(as.Date(NewEndDate) - as.Date(NewStartDate)) / PeriodLength
+            ProjectionPeriods2 <- as.numeric(as.Date(NewEndDate) - as.Date(NewStartDate) + 1) / PeriodLength
 
             #Conversion amount to date
 
@@ -733,7 +733,7 @@ server <- function(input, output){
 
 
             ProjectionPeriods1 <- DaysUntilIncremental / PeriodLength
-            ProjectionPeriods2 <- as.numeric(as.Date(NewEndDate) - as.Date(NewStartDate)) / PeriodLength
+            ProjectionPeriods2 <- as.numeric(as.Date(NewEndDate) - as.Date(NewStartDate) + 1) / PeriodLength
             ProjectionModels   <- data.frame(matrix(ncol = 7, nrow = 0))
 
 
@@ -861,7 +861,7 @@ server <- function(input, output){
         NewStartDate  <- as.Date(input$NewStartDate)
         NewEndDate    <- as.Date(input$NewEndDate)
 
-        ProjectionPeriods <- as.numeric(as.Date(NewEndDate) - as.Date(NewStartDate)) / PeriodLength
+        ProjectionPeriods <- as.numeric(as.Date(NewEndDate) - as.Date(NewStartDate) + 1) / PeriodLength
 
         for (i in 1:5){
 
@@ -973,7 +973,7 @@ server <- function(input, output){
             DaysUntilIncremental <- min(as.numeric(as.Date(ScheduledEndDate) - Sys.Date()) + 1, as.numeric(as.Date(NewStartDate) - Sys.Date()) + 1)
 
             ProjectionPeriods1 <- DaysUntilIncremental / PeriodLength
-            ProjectionPeriods2 <- as.numeric(as.Date(NewEndDate) - as.Date(NewStartDate)) / PeriodLength
+            ProjectionPeriods2 <- as.numeric(as.Date(NewEndDate) - as.Date(NewStartDate) + 1) / PeriodLength
 
             #Conversion amount to date
 
@@ -1060,7 +1060,7 @@ server <- function(input, output){
 
 
             ProjectionPeriods1 <- DaysUntilIncremental / PeriodLength
-            ProjectionPeriods2 <- as.numeric(as.Date(NewEndDate) - as.Date(NewStartDate)) / PeriodLength
+            ProjectionPeriods2 <- as.numeric(as.Date(NewEndDate) - as.Date(NewStartDate) + 1) / PeriodLength
             ProjectionModels   <- data.frame(matrix(ncol = 7, nrow = 0))
 
             for (i in 1:5){
