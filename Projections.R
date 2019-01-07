@@ -604,7 +604,7 @@ server <- function(input, output){
               LowerConvs    <- ProjectionPeriods * LowerConvs
               UpperConvs    <- ProjectionPeriods * UpperConvs
 
-              #Adding in current performance
+              ##Adding in current performance
 
               ExpectedConvs <- CurrentConvs + ExpectedConvs
               LowerConvs    <- CurrentConvs + LowerConvs
@@ -810,6 +810,7 @@ server <- function(input, output){
       #------------------------------------------------------------------ROAS---------------------------------------------------------------
     }else if(GoalType == "ROAS"){
 
+browser()
       CurrentPerfTable[, 6] <- as.data.frame(FCInfo [, 7])
       CurrentPerfTable[, 7] <- as.data.frame(FCInfo [, 9])
 
